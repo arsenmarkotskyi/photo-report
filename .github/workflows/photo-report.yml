@@ -1,0 +1,35 @@
+name: Photo report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install openpyxl
+
+      - name: Prepare output dir
+        run: mkdir -p out
+
+      - name: Run script
+        run: python main.py info.txt output.xlsx out/output_$(date +%F_%H-%M).xlsx
+
+      - name: Upload result artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: photo-report
+          path: out/*.xlsx
+          if-no-files-found: error
+          retention-days: 14
+
